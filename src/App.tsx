@@ -1,53 +1,57 @@
-import { useState } from 'react';
-import { Todo } from './types';
-import './App.css';
+import { useState } from "react";
 
-function App() {
+type Status = "todo" | "doing" | "done";
+type Todo = { id: string; title: string; status: Status };
+
+export default function App() {
+  const [text, setText] = useState("");
+  const [filter, setFilter] = useState<Status | "all">("all");
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [inputValue, setInputValue] = useState('');
 
-  const handleAddTodo = () => {
-    if (inputValue.trim() === '') {
-      return;
-    }
-
-    const newTodo: Todo = {
-      id: Date.now().toString(),
-      title: inputValue,
-    };
-
-    setTodos([...todos, newTodo]);
-    setInputValue('');
+  const addTodo = () => {
+    if (!text) return;
+    setTodos([{ id: crypto.randomUUID(), title: text, status: "todo" }, ...todos]);
+    setText("");
   };
 
-  const handleDeleteTodo = (id: string) => {
-    setTodos(todos.filter(todo => todo.id !== id));
-  };
+  const visible =
+    filter === "all" ? todos : todos.filter((t) => t.status === filter);
 
   return (
-    <div className="app">
-      <h1>Todo App</h1>
+    <div>
+      <h1>ToDo Status</h1>
 
-      <div className="input-section">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="新しいタスクを入力"
-        />
-        <button onClick={handleAddTodo}>追加</button>
-      </div>
+      <select onChange={(e) => setFilter(e.target.value as any)}>
+        <option value="all">全て</option>
+        <option value="todo">未着手</option>
+        <option value="doing">進行中</option>
+        <option value="done">完了</option>
+      </select>
 
-      <ul className="todo-list">
-        {todos.map((todo) => (
-          <li key={todo.id} className="todo-item">
-            <span>{todo.title}</span>
-            <button onClick={() => handleDeleteTodo(todo.id)}>削除</button>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <button onClick={addTodo}>Add</button>
+
+      <ul>
+        {visible.map((t) => (
+          <li key={t.id}>
+            {t.title}
+            <select
+              value={t.status}
+              onChange={(e) =>
+                setTodos(
+                  todos.map((x) =>
+                    x.id === t.id ? { ...x, status: e.target.value as Status } : x
+                  )
+                )
+              }
+            >
+              <option value="todo">未着手</option>
+              <option value="doing">進行中</option>
+              <option value="done">完了</option>
+            </select>
           </li>
         ))}
       </ul>
     </div>
   );
 }
-
-export default App;
