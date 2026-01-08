@@ -1,53 +1,49 @@
-import { useState } from 'react';
-import { Todo } from './types';
-import './App.css';
+import { useState } from "react";
+import "./App.css";
 
-function App() {
+type Todo = {
+  id: string;
+  title: string;
+  dueDate: string | null;
+};
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+export default function App() {
+  const [text, setText] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [inputValue, setInputValue] = useState('');
 
-  const handleAddTodo = () => {
-    if (inputValue.trim() === '') {
-      return;
-    }
-
-    const newTodo: Todo = {
-      id: Date.now().toString(),
-      title: inputValue,
-    };
-
-    setTodos([...todos, newTodo]);
-    setInputValue('');
+  const addTodo = () => {
+    if (!text.trim()) return;
+    setTodos([
+      { id: crypto.randomUUID(), title: text, dueDate: dueDate || null },
+      ...todos,
+    ]);
+    setText("");
+    setDueDate("");
   };
 
-  const handleDeleteTodo = (id: string) => {
-    setTodos(todos.filter(todo => todo.id !== id));
-  };
+  const isOverdue = (t: Todo) =>
+    t.dueDate !== null && t.dueDate < today();
 
   return (
-    <div className="app">
-      <h1>Todo App</h1>
+    <div>
+      <h1>ToDo (Due Date)</h1>
 
-      <div className="input-section">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="新しいタスクを入力"
-        />
-        <button onClick={handleAddTodo}>追加</button>
-      </div>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+      <button onClick={addTodo}>Add</button>
 
-      <ul className="todo-list">
-        {todos.map((todo) => (
-          <li key={todo.id} className="todo-item">
-            <span>{todo.title}</span>
-            <button onClick={() => handleDeleteTodo(todo.id)}>削除</button>
+      <ul>
+        {todos.map((t) => (
+          <li key={t.id} className={isOverdue(t) ? "overdue" : ""}>
+            {t.title}
+            {t.dueDate && `（期限: ${t.dueDate}）`}
+            {isOverdue(t) && " ←期限切れ"}
           </li>
         ))}
       </ul>
     </div>
   );
 }
-
-export default App;
