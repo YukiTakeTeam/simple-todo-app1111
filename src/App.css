@@ -69,3 +69,8 @@ h1 {
 .todo-item button:hover {
   background-color: #c82333;
 }
+
+.overdue {
+  background: #ffe0e0;
+  border: 1px solid red;
+}
