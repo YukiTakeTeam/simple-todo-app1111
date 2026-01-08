@@ -1,53 +1,40 @@
-import { useState } from 'react';
-import { Todo } from './types';
-import './App.css';
+import { useState } from "react";
 
-function App() {
+type Todo = { id: string; title: string; status: number };
+
+export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  const [sort, setSort] = useState("status");
 
-  const handleAddTodo = () => {
-    if (inputValue.trim() === '') {
-      return;
-    }
-
-    const newTodo: Todo = {
-      id: Date.now().toString(),
-      title: inputValue,
-    };
-
-    setTodos([...todos, newTodo]);
-    setInputValue('');
-  };
-
-  const handleDeleteTodo = (id: string) => {
-    setTodos(todos.filter(todo => todo.id !== id));
-  };
+  const sorted = [...todos].sort((a, b) =>
+    sort === "status" ? a.status - b.status : a.title.localeCompare(b.title)
+  );
 
   return (
-    <div className="app">
-      <h1>Todo App</h1>
+    <div>
+      <h1>Sort Todos</h1>
 
-      <div className="input-section">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="新しいタスクを入力"
-        />
-        <button onClick={handleAddTodo}>追加</button>
-      </div>
+      <select onChange={(e) => setSort(e.target.value)}>
+        <option value="status">状態順</option>
+        <option value="title">タイトル順</option>
+      </select>
 
-      <ul className="todo-list">
-        {todos.map((todo) => (
-          <li key={todo.id} className="todo-item">
-            <span>{todo.title}</span>
-            <button onClick={() => handleDeleteTodo(todo.id)}>削除</button>
-          </li>
+      <button
+        onClick={() =>
+          setTodos([
+            ...todos,
+            { id: crypto.randomUUID(), title: "task", status: Math.floor(Math.random() * 3) },
+          ])
+        }
+      >
+        Add dummy
+      </button>
+
+      <ul>
+        {sorted.map((t) => (
+          <li key={t.id}>{t.title}</li>
         ))}
       </ul>
     </div>
   );
 }
-
-export default App;
